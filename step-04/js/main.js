@@ -1,8 +1,8 @@
 'use strict';
 
 const videoUrl = 'video/bunny.webm';
-const videoSize = 2165175;
-const chunkSize = videoSize / 5;
+const videoSize = 27146030;
+const chunkSize = videoSize / 100;
 
 var video = document.querySelector('video');
 var mediaSource = new MediaSource();
@@ -10,7 +10,7 @@ var mediaSource = new MediaSource();
 video.src = URL.createObjectURL(mediaSource);
 
 mediaSource.addEventListener('sourceopen', event => {
-  let sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vorbis,vp8"');
+  let sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vorbis,vp9"');
 
   (function fetchChunk(startRange) {
 
