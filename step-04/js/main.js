@@ -10,10 +10,25 @@ var mediaSource = new MediaSource();
 video.src = URL.createObjectURL(mediaSource);
 
 mediaSource.addEventListener('sourceopen', event => {
+  let fetch_chunk = false;
+  let nextStartRange = 0;
+
+  fetchChunk(nextStartRange);
+
+  video.addEventListener('pause', (event) => {
+    console.log("video paused");
+    fetch_chunk = false;
+  });
+
+  video.onplay = function() {
+    console.log("video playing");
+    fetch_chunk = true;
+    fetchChunk(nextStartRange);
+  }
+
   let sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vorbis,vp9"');
 
-  (function fetchChunk(startRange) {
-
+  function fetchChunk(startRange) {
     let endRange = startRange + chunkSize - 1;
     let options = {
       headers: {
@@ -32,11 +47,13 @@ mediaSource.addEventListener('sourceopen', event => {
         }
       });
 
-      let nextStartRange = endRange + 1;
+      nextStartRange = endRange + 1;
       if (nextStartRange < videoSize) {
-        return fetchChunk(nextStartRange);
+        console.log(fetch_chunk);
+        if (fetch_chunk === true) {
+          return fetchChunk(nextStartRange);
+        }
       }
     });
-
-  })(0); // Start the recursive call by self calling.
+  }; // Start the recursive call by self calling.
 }, { once: true });
