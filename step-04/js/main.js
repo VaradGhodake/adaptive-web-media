@@ -12,8 +12,10 @@ video.src = URL.createObjectURL(mediaSource);
 mediaSource.addEventListener('sourceopen', event => {
   let sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vorbis,vp9"');
 
-  (function fetchChunk(startRange) {
+  // declare sleep
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+  (function fetchChunk(startRange, back_to_back) {
     let endRange = startRange + chunkSize - 1;
     let options = {
       headers: {
@@ -34,9 +36,18 @@ mediaSource.addEventListener('sourceopen', event => {
 
       let nextStartRange = endRange + 1;
       if (nextStartRange < videoSize) {
-        return fetchChunk(nextStartRange);
+        if(back_to_back > 1) {
+          return fetchChunk(nextStartRange, back_to_back-1);
+        } else {
+
+          (async () => {
+            // sleep for 6 seconds
+            await sleep(6000);
+            return fetchChunk(nextStartRange, 0);
+          })();
+        }
       }
     });
 
-  })(0); // Start the recursive call by self calling.
+  })(0, 5); // Start the recursive call by self calling.
 }, { once: true });
