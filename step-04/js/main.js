@@ -10,7 +10,7 @@ var mediaSource = new MediaSource();
 video.src = URL.createObjectURL(mediaSource);
 
 mediaSource.addEventListener('sourceopen', event => {
-  let fetch_chunk = false;
+  let fetch_chunk = true;
   let nextStartRange = 0;
 
   fetchChunk(nextStartRange);
@@ -22,8 +22,11 @@ mediaSource.addEventListener('sourceopen', event => {
 
   video.onplay = function() {
     console.log("video playing");
-    fetch_chunk = true;
-    fetchChunk(nextStartRange);
+
+    if(fetch_chunk === false) {
+      fetch_chunk = true;
+      fetchChunk(nextStartRange);
+    }
   }
 
   let sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vorbis,vp9"');
@@ -37,6 +40,8 @@ mediaSource.addEventListener('sourceopen', event => {
       }
     };
 
+    nextStartRange = endRange + 1;
+
     return fetch(videoUrl, options)
     .then(response => response.arrayBuffer())
     .then(arrayBuffer => {
@@ -47,7 +52,6 @@ mediaSource.addEventListener('sourceopen', event => {
         }
       });
 
-      nextStartRange = endRange + 1;
       if (nextStartRange < videoSize) {
         console.log(fetch_chunk);
         if (fetch_chunk === true) {
